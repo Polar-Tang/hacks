@@ -36,19 +36,19 @@ cat "$output_dir/alive-doit.txt" | /root/go/bin/katana -d 5 -c 50 -jc -s breadth
 echo "[*] Running hakrawler"
 cat "$output_dir/alive-doit.txt" | /root/go/bin/hakrawler -d 5 -t 20 -subs | tee "$output_dir/hakrawler.txt"
 
+echo "[*] Running cariddi"
+cat "$output_dir/alive-doit.txt" | /root/go/bin/cariddi -e -err -info -debug
+
 echo "[*] Extracting JavaScript files"
 cat "$output_dir"/*.txt | grep ".js" | sort -u | tee "$output_dir/alljs.txt"
 
-
+echo "[*] Mixing all"
 cat "$output_dir/alljs.txt" | httpx-toolkit >> "$output_dir/alive-js.txt"
 
 echo "[*] Running mantra on JavaScript files"
 cat "$output_dir/alive-js.txt" | /root/go/bin/mantra
 
-echo "[*] Running cariddi"
-cat "$output_dir/alljs.txt" | /root/go/bin/cariddi -e -err -info -debug
-
 echo "[*] Running nuclei with exposure templates"
-cat "$output_dir/alljs.txt" | /root/go/bin/nuclei -t /root/nuclei-templates/exposures
+cat "$output_dir/alive-js.txt" | /root/go/bin/nuclei -t /root/nuclei-templates/exposures
 
 echo "[*] Process completed. Results are saved in $output_dir"
