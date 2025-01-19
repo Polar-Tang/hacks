@@ -18,5 +18,3 @@ pyperclip.copy(text)
 
 # go to keyboard configuration and set this comand:
 # python3 /usr/local/bin/image_grab
-
-# -subfinder -d doit.com -all -recursive
