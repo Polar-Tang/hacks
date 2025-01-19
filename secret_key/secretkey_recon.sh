@@ -11,7 +11,7 @@ fi
 
 domain="$1"
 
-output_dir=~/"$domain"
+output_dir="$pwd"/"$domain"
 
 mkdir -p "$output_dir"
 
@@ -39,8 +39,11 @@ cat "$output_dir/alive-doit.txt" | /root/go/bin/hakrawler -d 5 -t 20 -subs | tee
 echo "[*] Extracting JavaScript files"
 cat "$output_dir"/*.txt | grep ".js" | sort -u | tee "$output_dir/alljs.txt"
 
+
+cat "$output_dir/alljs.txt" | httpx-toolkit >> "$output_dir/alive-js.txt"
+
 echo "[*] Running mantra on JavaScript files"
-cat "$output_dir/alljs.txt" | /root/go/bin/mantra
+cat "$output_dir/alive-js.txt" | /root/go/bin/mantra
 
 echo "[*] Running cariddi"
 cat "$output_dir/alljs.txt" | /root/go/bin/cariddi -e -err -info -debug
