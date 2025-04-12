@@ -20,9 +20,12 @@ fi
 
 subfinder_output="${domain}"
 assetfinder_output="${domain}_2"
+waybackurls="${domain}_3"
 sorted_output="${domain}_sorted"
 merged_output="${domain}_final"
 alive_output="${domain}_alive"
+alive_output_domains="${domain}_alive_domais"
+
 pics_dir="${domain}_pics"
 out_dir="${domain}_output"
 
@@ -32,13 +35,18 @@ echo "[*] Running subfinder for domain: $domain"
 subfinder -d "$domain" -o "$out_dir"/"$subfinder_output"
 
 echo "[*] Running assetfinder for domain: $domain"
-assetfinder "$domain" | sort -u > "$out_dir"/"$assetfinder_output"
+assetfinder "$domain" > "$out_dir"/"$assetfinder_output"
 
-echo "[*] Sorting subfinder results"
+echo "[*] Running waybackurls for domain: $domain"
+echo $domain | waybackurls > "$out_dir"/"$waybackurls"
+
+echo "[*] Sorting results"
 cat "$out_dir"/"$subfinder_output" | sort -u > "$out_dir"/"$sorted_output"
+
 
 echo "[*] Merging sorted results with assetfinder results"
 cat ""$out_dir"/$sorted_output" >> "$out_dir"/"$assetfinder_output"
+cat "$out_dir"/"$waybackurls" >> "$out_dir"/"$assetfinder_output"
 cat "$out_dir"/"$assetfinder_output" | sort -u > "$out_dir"/"$merged_output"
 
 echo "[*] Probing for live domains with httprobe"
@@ -48,10 +56,10 @@ echo "[*] Creating directory for screenshots: $pics_dir"
 mkdir -p "$out_dir"/"$pics_dir"
 
 echo "[*] Running gowitness for live domains"
-gowitval=$(awk '{gsub(/https:\/\//, "", $1); if($1 != "") print $1}' "$out_dir"/"$alive_output" 2>/dev/null)
+awk '{gsub(/https:\/\//, "", $1); if($1 != "") print $1}' "$out_dir"/"$alive_output" > "$out_dir"/"$alive_output_domains"
 
 if [[ -n "$gowitval" ]]; then
-    gowitness file -f <(echo "$gowitval") -P "$out_dir"/"$pics_dir" --no-http
+    gowitness scan file -f "$out_dir"/"$alive_output_domains" -s "$out_dir"/"$pics_dir"
 else
     echo "[!] No live domains found to process with gowitness."
 fi
@@ -62,3 +70,4 @@ echo " - Assetfinder results: $out_dir/$assetfinder_output"
 echo " - Final merged results: $out_dir/$merged_output"
 echo " - Live domains: $out_dir/$alive_output"
 echo " - Screenshots stored in: $out_dir/$pics_dir"
+                                                     
